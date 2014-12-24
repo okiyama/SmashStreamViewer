@@ -47,13 +47,16 @@
    * Super%20Smash%20Bros.%20Brawl - Brawl
    * Project%20M - Project M
    */
+var jsonArray = new Array(); //Will contain the JSON data for making stream lists.
+                             //This is global, but after it has data in it, the program doesn't use it globally. 
+                             //Instead, it is passed around an used like a local vairable.
+
 function requestStreamers()
 {
   //So data flow is search query results in JSON, query can die.
 
   //Nevermind, we'll steal the "game" attribute and use that to name our sections.
-  //So we're good, get a dataArray then we can loop through that and grab the name of the first "game" to name the sections
-  var dataArray = new Array(); //Will contain the JSON data for making stream lists.
+  //So we're good, get a jsonArray then we can loop through that and grab the name of the first "game" to name the sections
   var searchQueries = new Array('Super%20Smash%20Bros.%20Melee',
                                 'Super%20Smash%20Bros.%20for%20Wii%20U',
                                 'Super%20Smash%20Bros.%20for%20Nintendo%203DS',
@@ -63,8 +66,8 @@ function requestStreamers()
 
   for (var i = searchQueries.length - 1; i >= 0; i--) {
     var req = new XMLHttpRequest();
-    req.open('GET', apiUrl + 'search/streams?q=' + searchQueries[i], true);
-    req.onload = parseJSON.bind(this); //Can't just do this, need to parse out the JSON first.
+    req.open('GET', apiUrl + 'search/streams?limit=100&q=' + searchQueries[i], true);
+    req.onload = parseJSON.bind(this, searchQueries.length); //Can't just do this, need to parse out the JSON first.
     //onload = parseJSON(this), somehow get the data back into the data array. Who knows.
 
     try {
@@ -84,47 +87,41 @@ function requestStreamers()
 }
 
 /**
- * Given an XMLhttpRequest which contains JSON data, parses that JSON then returns it.
-
+ * Given an XMLhttpRequest which contains JSON data, parses that JSON then adds it to a global array for json data.
+ * Once we have parsed all the data and put it into the global array, we pass that array on to the remainder of the program.
+ *
+ * The reason for the questionable use of the global array is that we're loading things asynchronously, so we don't know what
+ * finishes when.
+ *
  * @param {XMLhttpRequest} httpRequest The http request.
  * @return The given data as parsed JSON.
  */
- function parseJSON(httpRequest) {
+function parseJSON(numRequests, httpRequest) 
+{
   var unparsed = httpRequest.target.responseText;
   var data = JSON.parse(unparsed);
-  return data;
- }
+  jsonArray.push(data);
 
-/**
- * Handle the 'onload' event of our streamer XHR request, generated in
- * 'requestStreamers', by generating 'img' elements, and stuffing them into
- * the document for display.
- *
- * @param {ProgressEvent} e The XHR ProgressEvent.
- * @private
- */
-function loadRunners(e)
-{
-  var runners = e.target.responseText;
-  var data = JSON.parse(runners);
-
-  initializeDoc(data);
-
-  $('a').click(openLink);
+  //Once we've pushed as many pieces of data as there are requests, we'll move on and pass on the finalized array.
+  if(jsonArray.length == numRequests) {
+    alert("all done!");
+  }
 }
 
 /**
- * Initializes the document by loading the top level divs.
- * @param data The JSON data to load runner count from
+ * Loads the content of the popup given the data required, as an array.
  *
+ * @param {Array} jsonArray The array of data that we'll build the popup from.
  * @private
  */
-function initializeDoc(data)
+function loadRunners(jsonArray)
 {
   loadButtons();
   renderDonate();
+  //For loop here, loadStreamerList for each JSON and append it appropriately
   var streamerList = loadStreamerList(data);
   document.getElementById('container').appendChild(streamerList);
+  $('a').click(openLink);
 }
 
 /**

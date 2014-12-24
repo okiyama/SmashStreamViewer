@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "SpeedRunsLive Stream Viewer",
-  "description": "For easily viewing the streams on SpeedRunsLive.com",
-  "version": "1.5.3",
+  "name": "Smash Stream Viewer",
+  "description": "For easily viewing the Super Smash Bros. streams on Twitch.tv.",
+  "version": "1.0.0",
 
   "browser_action": {
     "default_icon": "images/icon19.png",
