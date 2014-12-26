@@ -208,6 +208,13 @@ p {
   margin-right: 5px;
 }
 
+[isOpen = true] > .streamList {
+  display: block;
+}
+
+[isOpen = false] > .streamList {
+  display: none;
+}
 .errorMessage {
   margin-top: 2.5%;
   font-size: 120%;
